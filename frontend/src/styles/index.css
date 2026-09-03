@@ -1,0 +1,43 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  background: #0c0e12;
+  font-feature-settings: "ss01";
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #2a3140 transparent;
+}
+
+.mono {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+}
+
+.diff-del {
+  background: rgba(196, 92, 92, 0.18);
+  text-decoration: line-through;
+}
+.diff-add {
+  background: rgba(61, 139, 110, 0.2);
+}
+
+.process-mesh {
+  background:
+    radial-gradient(900px 420px at 12% -10%, rgba(196, 165, 116, 0.16), transparent 55%),
+    radial-gradient(700px 380px at 110% 10%, rgba(91, 124, 153, 0.14), transparent 50%),
+    radial-gradient(600px 500px at 50% 120%, rgba(61, 139, 110, 0.08), transparent 45%),
+    rgba(12, 14, 18, 0.78);
+}

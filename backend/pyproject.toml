@@ -1,0 +1,11 @@
+[project]
+name = "mlr-ruleops"
+version = "1.0.0"
+description = "AI-Assisted Regulatory Rule Change & Validation Platform"
+requires-python = ">=3.12"
+
+[tool.pytest.ini_options]
+testpaths = ["../tests/backend", "tests"]
+pythonpath = ["."]
+asyncio_mode = "auto"
+filterwarnings = ["ignore::DeprecationWarning"]
