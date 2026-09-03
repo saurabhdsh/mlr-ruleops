@@ -25,7 +25,7 @@ export function AdminPage() {
             </div>
           ))}
         </Card>
-        <Card title="Scientific citations (Synthetic Demo Dataset)" className="col-span-2">
+        <Card title="Scientific citations — Tata Consultancy Services" className="col-span-2">
           <table className="w-full text-sm">
             <thead className="text-[11px] uppercase text-mist-500">
               <tr>

@@ -53,7 +53,7 @@ export function LoginPage() {
           {busy ? "Signing in…" : "Continue"}
         </button>
         <p className="text-[11px] text-mist-500 mt-4 leading-relaxed">
-          Demo environment. Synthetic Demo Data. Default MLR Admin is pre-filled.
+          Tata Consultancy Services
         </p>
       </form>
     </div>

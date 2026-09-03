@@ -68,8 +68,15 @@ git pull origin main 2>/dev/null || true
 # ── 4. Build and start containers ────────────────────────────────────────────
 echo ""
 echo "Building and starting containers (this takes 3-5 minutes first time)..."
-docker compose -f docker-compose.aws.yml down 2>/dev/null || docker-compose -f docker-compose.aws.yml down 2>/dev/null || true
-docker compose -f docker-compose.aws.yml up -d --build 2>/dev/null || docker-compose -f docker-compose.aws.yml up -d --build
+COMPOSE=(docker compose -f docker-compose.aws.yml --project-name ruleops)
+if ! docker compose version &>/dev/null; then
+  COMPOSE=(docker-compose -f docker-compose.aws.yml -p ruleops)
+fi
+"${COMPOSE[@]}" down || true
+"${COMPOSE[@]}" up -d --build
+echo ""
+echo "Container status:"
+"${COMPOSE[@]}" ps
 
 # ── 5. Done ──────────────────────────────────────────────────────────────────
 echo ""
@@ -80,5 +87,7 @@ echo "  Login:    mlr.admin@mlr-ruleops.local"
 echo "  Password: ChangeMe!Mlr1"
 echo "============================================"
 echo ""
-echo "SEAL is unchanged on http://${EC2_HOST} (and 8080/3000)."
-echo "Check logs: docker compose -f docker-compose.aws.yml logs -f backend"
+echo "SEAL is unchanged on http://${EC2_HOST}:3000."
+echo "Open TCP ${APP_PORT} on the instance security group if the URL times out."
+echo "Status: docker compose -f docker-compose.aws.yml --project-name ruleops ps"
+echo "Logs:   docker compose -f docker-compose.aws.yml --project-name ruleops logs -f backend"

@@ -12,7 +12,7 @@ export function CommandCenter() {
   const d = dash.data || {};
   return (
     <Page title="Command Center" subtitle="Operational posture across rule change intake, validation, and deployment.">
-      <div className="text-[11px] text-mist-500 mb-4">Synthetic Demo Data — metrics calculated from the database.</div>
+      <div className="text-[11px] text-mist-500 mb-4">Tata Consultancy Services</div>
       <div className="grid grid-cols-4 gap-3 mb-6">
         <Metric label="Open tickets" value={d.open_tickets ?? "—"} />
         <Metric label="Processing" value={d.processing ?? "—"} />

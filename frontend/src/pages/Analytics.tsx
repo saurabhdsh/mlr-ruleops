@@ -9,7 +9,7 @@ export function AnalyticsPage() {
   const d = dash.data || {};
   return (
     <Page title="Analytics" subtitle="All figures are computed from persisted operational data.">
-      <div className="text-[11px] text-mist-500 mb-4">Synthetic Demo Data</div>
+      <div className="text-[11px] text-mist-500 mb-4">Tata Consultancy Services</div>
       <div className="grid grid-cols-4 gap-3 mb-6">
         <Metric label="Avg resolution hours" value={d.average_resolution_hours ?? "—"} />
         <Metric label="Median resolution hours" value={d.median_resolution_hours ?? "—"} />

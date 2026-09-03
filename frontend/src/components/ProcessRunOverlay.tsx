@@ -166,129 +166,90 @@ export function ProcessRunOverlay({
       : latest?.message || "Dispatching orchestration…";
 
   return createPortal(
-    <div className="fixed inset-0 z-[80] process-mesh backdrop-blur-xl">
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -left-24 top-16 h-72 w-72 rounded-full border border-brass-400/20 animate-orbit" />
-        <div className="absolute right-10 bottom-10 h-96 w-96 rounded-full border border-info/20 animate-orbit [animation-duration:18s]" />
-      </div>
-      <div className="relative h-full flex items-center justify-center p-6">
-        <div className="w-full max-w-5xl border border-ink-600/80 bg-ink-950/70 shadow-[0_30px_120px_rgba(0,0,0,0.55)] animate-rise">
-          <div className="relative overflow-hidden px-7 py-5 border-b border-ink-600">
-            <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-brass-400 to-transparent" />
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <div className="text-[11px] uppercase tracking-[0.28em] text-brass-400">Live orchestration</div>
-                <h2 className="text-2xl font-semibold mt-1 tracking-tight">{ticketNumber || "Ticket"}</h2>
-                <p className="text-sm text-mist-500 mt-1 max-w-xl">{title}</p>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="text-right hidden sm:block">
-                  <div className="text-[11px] uppercase tracking-[0.16em] text-mist-500">Executor</div>
-                  <div className="mono text-xs text-mist-300 mt-0.5">{execMode || (pending ? "dispatching" : "inline")}</div>
-                </div>
-                <button
-                  className="p-2 text-mist-500 hover:text-mist-100"
-                  onClick={onClose}
-                  aria-label="Close overlay"
+    <div className="fixed inset-0 z-[80] flex items-center justify-center p-4 bg-ink-950/60 backdrop-blur-[2px]">
+      <div className="w-full max-w-md max-h-[min(520px,80vh)] flex flex-col border border-ink-600 bg-ink-900 shadow-[0_16px_48px_rgba(0,0,0,0.45)]">
+        <div className="shrink-0 px-4 py-3 border-b border-ink-600">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <div className="text-[10px] uppercase tracking-[0.2em] text-brass-400">Live run</div>
+              <h2 className="text-base font-semibold mt-0.5 truncate">{ticketNumber || "Ticket"}</h2>
+              <p className="text-[11px] text-mist-500 truncate">{title}</p>
+            </div>
+            <div className="flex items-center gap-2 shrink-0">
+              <span className="mono text-[10px] text-mist-500">{execMode || (pending ? "…" : "inline")}</span>
+              <button className="p-1 text-mist-500 hover:text-mist-100" onClick={onClose} aria-label="Close overlay">
+                <X size={14} />
+              </button>
+            </div>
+          </div>
+          <div className="mt-2 flex items-center gap-2">
+            <div className="flex-1 h-1 bg-ink-700 overflow-hidden">
+              <div
+                className={`h-full transition-all duration-500 ${failed ? "bg-fail" : complete ? "bg-pass" : "bg-brass-400"}`}
+                style={{ width: `${complete ? 100 : Math.max(pending ? 6 : 0, pct)}%` }}
+              />
+            </div>
+            <div className="mono text-[11px] tabular-nums text-brass-400 w-9 text-right">{complete ? 100 : pct}%</div>
+          </div>
+          <p className="mt-2 text-[12px] text-mist-100 flex items-center gap-1.5 truncate">
+            <Cpu size={12} className={pending && !failed ? "text-brass-400 animate-pulse shrink-0" : "text-mist-500 shrink-0"} />
+            <span className="truncate">{headline}</span>
+          </p>
+        </div>
+
+        <div className="shrink-0 px-4 py-2.5 border-b border-ink-600 grid grid-cols-2 gap-1">
+          {STAGES.map((stage, i) => {
+            const Icon = stage.icon;
+            const st = states[i];
+            const isActive = i === active && pending && !failed;
+            return (
+              <div
+                key={stage.id}
+                className={`flex items-center gap-1.5 px-2 py-1 ${isActive ? "bg-brass-500/10" : ""}`}
+              >
+                <span
+                  className={`grid place-items-center h-5 w-5 shrink-0 rounded-full border ${
+                    st === "done"
+                      ? "border-pass/50 bg-pass/15 text-pass"
+                      : st === "fail"
+                        ? "border-fail/50 bg-fail/15 text-fail"
+                        : isActive
+                          ? "border-brass-400 text-brass-400"
+                          : "border-ink-600 text-mist-500"
+                  }`}
                 >
-                  <X size={16} />
-                </button>
+                  {st === "done" ? <Check size={10} /> : st === "fail" ? <AlertTriangle size={10} /> : <Icon size={10} />}
+                </span>
+                <span className={`text-[11px] truncate ${isActive || st === "done" ? "text-mist-100" : "text-mist-500"}`}>
+                  {stage.label}
+                </span>
               </div>
-            </div>
-            <div className="mt-4 flex items-center gap-4">
-              <div className="flex-1 h-[3px] bg-ink-700 overflow-hidden">
-                <div
-                  className={`h-full transition-all duration-500 ${failed ? "bg-fail" : complete ? "bg-pass" : "bg-brass-400"}`}
-                  style={{ width: `${complete ? 100 : Math.max(pending ? 6 : 0, pct)}%` }}
-                />
-              </div>
-              <div className="mono text-sm tabular-nums text-brass-400 w-12 text-right">{complete ? 100 : pct}%</div>
-            </div>
-            <p className="mt-3 text-sm text-mist-100 flex items-center gap-2">
-              <Cpu size={14} className={pending && !failed ? "text-brass-400 animate-pulse" : "text-mist-500"} />
-              {headline}
-            </p>
-          </div>
+            );
+          })}
+        </div>
 
-          <div className="grid grid-cols-12 min-h-[420px]">
-            <div className="col-span-5 border-r border-ink-600 p-5">
-              <ol className="space-y-1">
-                {STAGES.map((stage, i) => {
-                  const Icon = stage.icon;
-                  const st = states[i];
-                  const isActive = i === active && pending && !failed;
-                  return (
-                    <li
-                      key={stage.id}
-                      className={`flex items-center gap-3 px-3 py-2 transition-colors ${
-                        isActive ? "bg-brass-500/10 animate-pulse-glow" : ""
-                      }`}
-                    >
-                      <span
-                        className={`grid place-items-center h-8 w-8 rounded-full border ${
-                          st === "done"
-                            ? "border-pass/50 bg-pass/15 text-pass"
-                            : st === "fail"
-                              ? "border-fail/50 bg-fail/15 text-fail"
-                              : isActive
-                                ? "border-brass-400 text-brass-400"
-                                : "border-ink-600 text-mist-500"
-                        }`}
-                      >
-                        {st === "done" ? <Check size={14} /> : st === "fail" ? <AlertTriangle size={14} /> : <Icon size={14} />}
-                      </span>
-                      <div className="min-w-0 flex-1">
-                        <div className={`text-sm ${isActive || st === "done" ? "text-mist-100" : "text-mist-500"}`}>
-                          {stage.label}
-                        </div>
-                        <div className="text-[11px] text-mist-500 truncate">{stage.hint}</div>
-                      </div>
-                      <span className="text-[10px] uppercase tracking-[0.14em] text-mist-500">
-                        {st === "done" ? "done" : st === "fail" ? "halted" : isActive ? "live" : "queued"}
-                      </span>
-                    </li>
-                  );
-                })}
-              </ol>
-            </div>
-            <div className="col-span-7 relative p-5">
-              <div className="absolute inset-x-5 top-5 bottom-5 overflow-hidden pointer-events-none">
-                <div className="h-16 bg-gradient-to-b from-brass-400/10 to-transparent animate-scan" />
+        <div className="flex-1 min-h-0 overflow-y-auto px-4 py-2 space-y-1.5">
+          {!events.length && <div className="text-[12px] text-mist-500">Waiting for pipeline events…</div>}
+          {events
+            .slice()
+            .reverse()
+            .slice(0, 6)
+            .map((e, i) => (
+              <div key={`${e.sequence}-${e.event_type}-${i}`} className="border border-ink-600 bg-ink-950 px-2 py-1.5">
+                <div className="flex justify-between gap-2">
+                  <span className="mono text-[10px] text-brass-400 truncate">{e.event_type}</span>
+                  <span className="mono text-[10px] text-mist-500 shrink-0">{e.timestamp ? e.timestamp.slice(11, 19) : ""}</span>
+                </div>
+                <div className="text-[11px] text-mist-100 truncate">{e.message}</div>
               </div>
-              <div className="text-[11px] uppercase tracking-[0.2em] text-mist-500 mb-3">Live telemetry</div>
-              <div className="relative max-h-[360px] overflow-auto space-y-2 pr-2">
-                {!events.length && (
-                  <div className="text-sm text-mist-500">Waiting for worker events from PostgreSQL…</div>
-                )}
-                {events
-                  .slice()
-                  .reverse()
-                  .map((e, i) => (
-                    <div
-                      key={`${e.sequence}-${e.event_type}-${i}`}
-                      className="border border-ink-600/80 bg-ink-900/60 px-3 py-2 animate-rise"
-                    >
-                      <div className="flex justify-between gap-3">
-                        <span className="mono text-[11px] text-brass-400">{e.event_type}</span>
-                        <span className="mono text-[11px] text-mist-500">{e.timestamp ? e.timestamp.slice(11, 19) : ""}</span>
-                      </div>
-                      <div className="text-sm mt-1 text-mist-100">{e.message}</div>
-                    </div>
-                  ))}
-              </div>
-            </div>
-          </div>
+            ))}
+        </div>
 
-          <div className="px-7 py-4 border-t border-ink-600 flex items-center justify-between gap-3">
-            <div className="text-xs text-mist-500">
-              Stages advance from real workflow events. Progress is not simulated.
-            </div>
-            {complete || failed || error ? (
-              <Button onClick={onClose}>{failed || error ? "Close" : "View results"}</Button>
-            ) : (
-              <div className="text-xs text-brass-400 uppercase tracking-[0.16em]">Running</div>
-            )}
-          </div>
+        <div className="shrink-0 px-4 py-3 border-t border-ink-600 flex items-center justify-between gap-3">
+          <div className="text-[11px] text-mist-500">Tata Consultancy Services</div>
+          <Button onClick={onClose} disabled={pending && !failed && !error}>
+            {failed || error ? "Close" : pending ? "Running…" : "View results"}
+          </Button>
         </div>
       </div>
     </div>,
