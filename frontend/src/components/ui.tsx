@@ -3,7 +3,7 @@ import { pill } from "../utils/format";
 
 export function Page({ title, subtitle, actions, children }: { title: string; subtitle?: string; actions?: ReactNode; children: ReactNode }) {
   return (
-    <div className="min-h-screen">
+    <div className="min-h-full">
       <header className="sticky top-0 z-20 border-b border-ink-600 bg-ink-950/90 backdrop-blur px-8 py-4 flex items-end justify-between gap-4">
         <div>
           <h1 className="text-xl font-semibold">{title}</h1>

@@ -25,7 +25,12 @@ export function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen grid place-items-center bg-ink-950">
+    <div className="relative min-h-screen grid place-items-center bg-ink-950">
+      <img
+        src="/TCS-logo-white.svg"
+        alt="TCS"
+        className="absolute left-8 top-8 h-9 w-auto select-none"
+      />
       <form onSubmit={onSubmit} className="w-[420px] border border-ink-600 bg-ink-900 p-8">
         <div className="text-[11px] uppercase tracking-[0.22em] text-brass-400">MLR RuleOps</div>
         <h1 className="text-2xl mt-2 mb-1">Sign in</h1>

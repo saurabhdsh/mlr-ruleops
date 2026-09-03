@@ -1,0 +1,98 @@
+# Production stack for the same EC2 host as SEAL.
+# Host ports: 8081 (UI) — SEAL uses 80 / 8080 / 3000, so these do not collide.
+# Postgres and Redis stay on the Docker network only.
+name: ruleops
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: ruleops-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ruleops
+      POSTGRES_PASSWORD: ruleops
+      POSTGRES_DB: ruleops
+    volumes:
+      - ruleops_pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ruleops -d ruleops"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    networks:
+      - ruleops
+
+  redis:
+    image: redis:7-alpine
+    container_name: ruleops-redis
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    networks:
+      - ruleops
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: ruleops-api
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql+psycopg://ruleops:ruleops@postgres:5432/ruleops
+      REDIS_URL: redis://redis:6379/0
+      CORS_ORIGINS: http://52.0.130.62:8081,http://127.0.0.1:8081,http://localhost:8081
+      LLM_PROVIDER: bedrock
+      AWS_REGION: us-east-1
+      AWS_PROFILE: ""
+      BEDROCK_MODEL: ${BEDROCK_MODEL:-us.anthropic.claude-sonnet-4-5-20250929-v1:0}
+      SEED_ON_STARTUP: "true"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/v1/health')",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 90s
+    networks:
+      - ruleops
+
+  frontend:
+    build:
+      context: .
+      dockerfile: docker/web.Dockerfile
+    container_name: ruleops-web
+    restart: unless-stopped
+    ports:
+      - "8081:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1/"]
+      interval: 10s
+      timeout: 3s
+      retries: 6
+    networks:
+      - ruleops
+
+volumes:
+  ruleops_pg:
+
+networks:
+  ruleops:
+    name: ruleops

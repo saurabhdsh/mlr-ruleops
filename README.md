@@ -62,6 +62,21 @@ UI: http://localhost:5173
 API: http://localhost:8000/docs  
 Health: http://localhost:8000/api/v1/health
 
+### AWS (same EC2 as SEAL)
+
+SEAL stays on **80 / 8080 / 3000**. MLR RuleOps publishes only **8081**.
+
+On the instance (`52.0.130.62`):
+
+```bash
+git clone https://github.com/saurabhdsh/mlr-ruleops.git
+cd mlr-ruleops
+chmod +x deploy.sh
+./deploy.sh
+```
+
+Then open **http://52.0.130.62:8081**. Security group must allow inbound TCP **8081**. Bedrock uses the instance IAM role (no API keys), same as SEAL.
+
 ### Mac without Docker (recommended on a laptop)
 
 Same approach as the Biospecimen `start-local.sh` that already worked: project-local Postgres on port **54329** (avoids the system Postgres on 5432).

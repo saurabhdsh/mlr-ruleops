@@ -34,14 +34,14 @@ export function AppLayout() {
   const nav = useNavigate();
   const me = useQuery({ queryKey: ["me"], queryFn: AuthAPI.me });
   return (
-    <div className="min-h-screen flex">
-      <aside className="w-[240px] shrink-0 border-r border-ink-600 bg-ink-900 flex flex-col">
-        <div className="px-5 py-5 border-b border-ink-600">
+    <div className="h-screen flex overflow-hidden">
+      <aside className="w-[240px] shrink-0 h-full border-r border-ink-600 bg-ink-900 flex flex-col overflow-hidden">
+        <div className="px-5 py-5 border-b border-ink-600 shrink-0">
           <div className="text-[11px] uppercase tracking-[0.22em] text-brass-400">Medical Affairs</div>
           <div className="text-lg font-semibold mt-1">MLR RuleOps</div>
           <div className="text-xs text-mist-500 mt-1">Regulatory rule change platform</div>
         </div>
-        <nav className="flex-1 py-3 px-2 space-y-0.5">
+        <nav className="flex-1 py-3 px-2 space-y-0.5 overflow-y-auto">
           {NAV.map((item) => (
             <NavLink
               key={item.to}
@@ -58,7 +58,7 @@ export function AppLayout() {
             </NavLink>
           ))}
         </nav>
-        <div className="px-4 py-4 border-t border-ink-600 text-xs">
+        <div className="px-4 py-4 border-t border-ink-600 text-xs shrink-0">
           <div className="text-mist-300">{me.data?.full_name}</div>
           <div className="text-mist-500 mono">{me.data?.roles?.join(" · ")}</div>
           <button
@@ -72,7 +72,7 @@ export function AppLayout() {
           </button>
         </div>
       </aside>
-      <main className="flex-1 min-w-0 bg-ink-950">
+      <main className="flex-1 min-w-0 h-full overflow-y-auto bg-ink-950">
         <Outlet />
       </main>
     </div>

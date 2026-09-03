@@ -1,4 +1,10 @@
-const API = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+function apiBase(): string {
+  const configured = import.meta.env.VITE_API_BASE_URL;
+  if (configured) return configured.replace(/\/$/, "");
+  return import.meta.env.DEV ? "http://localhost:8000" : "";
+}
+
+const API = apiBase();
 
 export function getToken(): string | null {
   return localStorage.getItem("ruleops_token");
