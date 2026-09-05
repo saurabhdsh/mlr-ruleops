@@ -322,7 +322,27 @@ def serialize_ticket_workspace(db: Session, ticket: Ticket) -> dict:
             for a in audit
         ],
         "dependencies": [{"id": d.id, "depends_on_rule_id": d.depends_on_rule_id, "notes": d.notes} for d in deps],
+        "matrix": _ser_matrix(events),
         "llm_mode": interpretation["mode_label"] if interpretation else None,
+    }
+
+
+def _ser_matrix(events) -> dict:
+    import json as _json
+
+    latest = None
+    for event in reversed(events):
+        if event.event_type in {"MATRIX_MATCHED", "MATRIX_AMBIGUOUS", "MATRIX_MISS"}:
+            latest = event
+            break
+    if latest is None:
+        return {"status": None, "selected": None, "candidates": []}
+    payload = _json.loads(latest.payload or "{}")
+    return {
+        "status": latest.event_type,
+        "message": latest.message,
+        "selected": payload.get("selected"),
+        "candidates": payload.get("candidates") or [],
     }
 
 

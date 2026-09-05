@@ -89,6 +89,7 @@ class ChangeIntent(BaseModel):
     language: ChangeIntentField = Field(default_factory=ChangeIntentField)
     material_type: ChangeIntentField = Field(default_factory=ChangeIntentField)
     rule_category: ChangeIntentField = Field(default_factory=ChangeIntentField)
+    string_type: ChangeIntentField = Field(default_factory=ChangeIntentField)
     operation: str = ""
     old_value: str | None = None
     new_value: str | None = None

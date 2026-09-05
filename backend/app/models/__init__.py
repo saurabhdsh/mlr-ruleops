@@ -1,6 +1,7 @@
 from app.models.approval import ApprovalDecision, ApprovalPolicy, ApprovalRequest
 from app.models.audit import AuditEvent, WorkflowEvent
 from app.models.citation import ReferenceSource, ScientificCitation
+from app.models.configuration import ConfigurationMatrixRow
 from app.models.deployment import Deployment, RollbackEvent
 from app.models.integration import IntegrationConfiguration
 from app.models.notification import Notification
@@ -69,4 +70,5 @@ __all__ = [
     "ReferenceSource",
     "ScientificCitation",
     "IntegrationConfiguration",
+    "ConfigurationMatrixRow",
 ]

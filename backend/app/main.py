@@ -2,7 +2,7 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from app.api import approvals, auth, deployments, misc, proposals, rules, tickets
+from app.api import approvals, auth, configurations, deployments, misc, proposals, rules, tickets
 from app.core.config import settings
 from app.core.errors import RuleOpsError
 from app.core.logging import configure_logging
@@ -27,6 +27,7 @@ app.add_middleware(
 app.include_router(auth.router, prefix="/api/v1")
 app.include_router(tickets.router, prefix="/api/v1")
 app.include_router(rules.router, prefix="/api/v1")
+app.include_router(configurations.router, prefix="/api/v1")
 app.include_router(proposals.router, prefix="/api/v1")
 app.include_router(approvals.router, prefix="/api/v1")
 app.include_router(deployments.router, prefix="/api/v1")

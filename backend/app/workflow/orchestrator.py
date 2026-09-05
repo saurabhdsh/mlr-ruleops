@@ -14,6 +14,7 @@ from app.core.enums import ActorType, WorkflowState
 from app.core.errors import LowAIConfidence, RuleNotFound, ValidationFailed
 from app.models.approval import ApprovalRequest
 from app.models.citation import ScientificCitation
+from app.models.configuration import ConfigurationMatrixRow
 from app.models.rule import (
     ChangeOperation,
     ChangeProposal,
@@ -37,7 +38,8 @@ from app.models.validation import (
 from app.risk.engine import RiskEngine
 from app.rules.checksum import rule_checksum
 from app.rules.mutation import RuleMutationEngine
-from app.rules.resolver import RuleResolver
+from app.rules.matrix import ConfigurationMatrixResolver, row_to_dict
+from app.rules.resolver import RuleCandidate, RuleResolver
 from app.rules.validators import is_blocking, run_validators
 from app.testing_engine.impact import ImpactAnalyzer
 from app.testing_engine.regression import RegressionEngine
@@ -170,6 +172,7 @@ class TicketOrchestrator:
             "language",
             "material_type",
             "rule_category",
+            "string_type",
         ):
             field = getattr(intent, field_name)
             self.db.add(
@@ -206,7 +209,39 @@ class TicketOrchestrator:
             return ticket
 
         transition(ticket, WorkflowState.RULE_RESOLVING)
-        self.emit(ticket, "RULE_SEARCH_STARTED", "Searching rule hierarchy")
+        self.emit(ticket, "RULE_SEARCH_STARTED", "Searching configuration matrix then rule hierarchy")
+
+        matrix_rows = [row_to_dict(r) for r in self.db.query(ConfigurationMatrixRow).all()]
+        matrix = ConfigurationMatrixResolver().resolve(intent, matrix_rows)
+        self.emit(
+            ticket,
+            matrix.status,
+            matrix.explanation,
+            {
+                "config_id": matrix.selected.config_id if matrix.selected else None,
+                "rule_id": matrix.selected.rule_id if matrix.selected else None,
+                "candidates": [
+                    {"config_id": c.config_id, "rule_id": c.rule_id, "score": c.score}
+                    for c in matrix.candidates
+                ],
+                "selected": {
+                    "config_id": matrix.selected.config_id,
+                    "rule_id": matrix.selected.rule_id,
+                    "market": matrix.selected.market,
+                    "brand": matrix.selected.brand,
+                    "therapeutic_area": matrix.selected.therapeutic_area,
+                    "string_type": matrix.selected.string_type,
+                    "language": matrix.selected.language,
+                    "old_value": matrix.selected.old_value,
+                    "new_value": matrix.selected.new_value,
+                    "static_link": matrix.selected.static_link,
+                    "score": matrix.selected.score,
+                    "reasons": matrix.selected.reasons,
+                }
+                if matrix.selected
+                else None,
+            },
+        )
 
         rules = self._load_rule_dicts()
         inheritances = [
@@ -218,6 +253,25 @@ class TicketOrchestrator:
             for d in self.db.query(RuleDependency).all()
         ]
         resolution = RuleResolver().resolve(intent, rules, inheritances, deps)
+        if matrix.selected:
+            pinned = self.db.query(RuleDefinition).filter(RuleDefinition.rule_id == matrix.selected.rule_id).one_or_none()
+            if pinned:
+                match = next((c for c in resolution.candidates if c.rule_id == pinned.rule_id), None)
+                resolution.selected = match or RuleCandidate(
+                    rule_pk=pinned.id,
+                    rule_id=pinned.rule_id,
+                    name=pinned.name,
+                    scope_type="MARKET_BRAND",
+                    market=matrix.selected.market,
+                    brand=matrix.selected.brand,
+                    therapeutic_area=matrix.selected.therapeutic_area,
+                    material_type=None,
+                    category=matrix.selected.string_type,
+                    priority=pinned.priority,
+                    match_score=matrix.selected.score,
+                    reasons=["matrix:" + matrix.selected.config_id],
+                )
+                resolution.explanation = f"{matrix.explanation} {resolution.explanation}"
         if resolution.selected is None:
             transition(ticket, WorkflowState.NEEDS_CLARIFICATION)
             ticket.processing_lock = 0

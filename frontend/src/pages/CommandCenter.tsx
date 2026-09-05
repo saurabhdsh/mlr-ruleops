@@ -20,6 +20,7 @@ export function CommandCenter() {
         <Metric label="High risk" value={d.high_risk ?? "—"} />
         <Metric label="Avg resolution (h)" value={d.average_resolution_hours ?? "—"} />
         <Metric label="Rules in production" value={d.rules_in_production ?? "—"} />
+        <Metric label="Active configurations" value={d.active_configurations ?? "—"} />
         <Metric label="Deployments today" value={d.deployments_today ?? "—"} />
         <Metric label="Regression pass rate" value={fmtPct(d.regression_pass_rate)} />
       </div>

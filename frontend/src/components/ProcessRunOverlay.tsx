@@ -44,7 +44,15 @@ const STAGES = [
     label: "Rule resolution",
     hint: "Market-Brand › Brand › Market › Universal",
     icon: GitBranch,
-    events: ["RULE_SEARCH_STARTED", "TARGET_RULE_SELECTED", "CURRENT_RULE_RETRIEVED", "RULE_NOT_FOUND"],
+    events: [
+      "RULE_SEARCH_STARTED",
+      "MATRIX_MATCHED",
+      "MATRIX_AMBIGUOUS",
+      "MATRIX_MISS",
+      "TARGET_RULE_SELECTED",
+      "CURRENT_RULE_RETRIEVED",
+      "RULE_NOT_FOUND",
+    ],
   },
   {
     id: "propose",

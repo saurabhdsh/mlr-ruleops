@@ -12,6 +12,7 @@ import { VersionsPage } from "../pages/Versions";
 import { AuditPage } from "../pages/Audit";
 import { AnalyticsPage } from "../pages/Analytics";
 import { AdminPage } from "../pages/Admin";
+import { ConfigurationMatrixPage } from "../pages/ConfigurationMatrix";
 import { getToken } from "../api/client";
 
 function Guard({ children }: { children: React.ReactNode }) {
@@ -35,6 +36,7 @@ export default function App() {
         <Route path="/tickets/:id" element={<WorkspacePage />} />
         <Route path="/workspace" element={<WorkspacePage />} />
         <Route path="/rules" element={<RuleExplorer />} />
+        <Route path="/configurations" element={<ConfigurationMatrixPage />} />
         <Route path="/testing" element={<TestingLab />} />
         <Route path="/approvals" element={<ApprovalsPage />} />
         <Route path="/deployments" element={<DeploymentsPage />} />

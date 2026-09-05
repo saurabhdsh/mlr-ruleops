@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session
 from app.core.enums import RoleName
 from app.models.approval import ApprovalPolicy
 from app.models.citation import ReferenceSource, ScientificCitation
+from app.models.configuration import ConfigurationMatrixRow
 from app.models.integration import IntegrationConfiguration
 from app.models.rule import (
     RuleDefinition,
@@ -48,9 +49,10 @@ USERS = [
 
 
 def seed_if_empty(db: Session, reviews: int = 200) -> None:
-    if db.query(User).first():
+    if not db.query(User).first():
+        seed_all(db, reviews)
         return
-    seed_all(db, reviews)
+    seed_configuration_matrix_if_empty(db)
 
 
 def seed_all(db: Session, reviews: int = 200) -> None:
@@ -58,10 +60,11 @@ def seed_all(db: Session, reviews: int = 200) -> None:
     _citations(db)
     _policies(db)
     _integrations(db)
-    rules = _rules(db)
+    _rules(db)
     _tickets(db)
     generate_historical_reviews(db, reviews)
     _test_cases(db)
+    seed_configuration_matrix_if_empty(db)
     db.flush()
 
 
@@ -599,6 +602,116 @@ def _test_cases(db: Session) -> None:
                 expected_flags="[]",
             )
         )
+
+
+MATRIX_MARKETS = [
+    ("US", "US"),
+    ("UK", "GB"),
+    ("DE", "DE"),
+    ("FR", "FR"),
+    ("ES", "ES"),
+    ("IT", "IT"),
+    ("JP", "JP"),
+    ("AU", "AU"),
+    ("CA", "CA"),
+    ("BR", "BR"),
+    ("MX", "MX"),
+    ("IN", "IN"),
+    ("KR", "KR"),
+]
+MATRIX_BRANDS = ["Drug A", "Drug B"]
+MATRIX_STRING_TYPES = ["DISCLAIMER", "PI_LINK", "CLAIM"]
+MATRIX_LANGUAGES = [
+    "EN",
+    "ES",
+    "FR",
+    "DE",
+    "IT",
+    "PT",
+    "JA",
+    "KO",
+    "ZH",
+    "NL",
+    "SV",
+    "DA",
+    "FI",
+    "NO",
+    "PL",
+    "TR",
+    "AR",
+    "HI",
+    "TH",
+    "VI",
+    "ID",
+    "RU",
+]
+
+
+def seed_configuration_matrix_if_empty(db: Session) -> None:
+    if db.query(ConfigurationMatrixRow).first():
+        return
+    combos: list[tuple[str, str, str, str]] = []
+    for market, country in MATRIX_MARKETS:
+        for brand in MATRIX_BRANDS:
+            for string_type in MATRIX_STRING_TYPES:
+                combos.append((market, country, brand, string_type))
+    if len(combos) != 78:
+        raise RuntimeError(f"Expected 78 configuration combos, got {len(combos)}")
+
+    existing_ids = {r.rule_id for r in db.query(RuleDefinition).all()}
+
+    def pick_rule(market: str, brand: str, string_type: str) -> str:
+        if market == "US" and brand == "Drug A" and string_type == "DISCLAIMER":
+            return "RULE-US-DRUGA-CV-014"
+        if string_type == "CLAIM" and brand == "Drug A" and "RULE-DRUGA-BRAND-001" in existing_ids:
+            return "RULE-DRUGA-BRAND-001"
+        compact = brand.replace(" ", "").upper()
+        for rid in existing_ids:
+            if rid.startswith(f"RULE-{market}-{compact}-"):
+                return rid
+        if "RULE-UNIV-DISCLAIMER-001" in existing_ids:
+            return "RULE-UNIV-DISCLAIMER-001"
+        return next(iter(existing_ids), "RULE-UNIV-DISCLAIMER-001")
+
+    lang_cursor = 0
+    for i, (market, country, brand, string_type) in enumerate(combos):
+        is_hero = market == "US" and brand == "Drug A" and string_type == "DISCLAIMER"
+        language = "EN" if is_hero else MATRIX_LANGUAGES[lang_cursor % len(MATRIX_LANGUAGES)]
+        if not is_hero:
+            lang_cursor += 1
+        if is_hero:
+            area = "Cardiovascular"
+            old_value = (
+                "Drug A (generic name) is indicated to reduce cardiovascular risk in appropriate adults. "
+                "This promotional claim is supported by Smith et al., 2020 (CIT-2020-001). "
+                "See full prescribing information."
+            )
+            static_link = "https://pi.example/US/DrugA/en"
+            config_id = "CFG-US-DRUGA-CV-DISCLAIMER-EN"
+        else:
+            area = AREAS[i % len(AREAS)]
+            old_value = f"{market} {brand} {area} {string_type} static text (v1)."
+            static_link = f"https://pi.example/{market}/{brand.replace(' ', '')}/{language.lower()}"
+            config_id = f"CFG-{market}-{brand.replace(' ', '').upper()}-{string_type}-{language}"
+        db.add(
+            ConfigurationMatrixRow(
+                config_id=config_id,
+                market=market,
+                country=country,
+                language=language,
+                brand=brand,
+                therapeutic_area=area,
+                string_type=string_type,
+                old_value=old_value,
+                new_value=None,
+                static_link=static_link,
+                rule_switch="ON",
+                additional_params=json.dumps({"material": "Promotional", "source": "static_text"}),
+                rule_id=pick_rule(market, brand, string_type),
+                status="ACTIVE",
+            )
+        )
+    db.flush()
 
 
 if __name__ == "__main__":

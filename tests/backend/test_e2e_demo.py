@@ -53,6 +53,8 @@ def test_full_demo_journey(client, auth_headers, db):
     body = processed.json()
     assert body["interpretation"]["is_local_fallback"] is True
     assert "Local deterministic" in body["interpretation"]["mode_label"]
+    assert body["matrix"]["status"] == "MATRIX_MATCHED"
+    assert body["matrix"]["selected"]["config_id"] == "CFG-US-DRUGA-CV-DISCLAIMER-EN"
     assert body["proposal"]["target_rule_id"] == "RULE-US-DRUGA-CV-014"
     assert "CIT-2026-004" in str(body["proposal"]["proposed_body"])
     assert "CIT-2020-001" not in [r.get("id") for r in body["proposal"]["proposed_body"].get("references", [])]

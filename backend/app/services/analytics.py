@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 
 from app.core.enums import WorkflowState
 from app.models.deployment import Deployment, RollbackEvent
+from app.models.configuration import ConfigurationMatrixRow
 from app.models.rule import ChangeProposal, RuleDefinition
 from app.models.ticket import Ticket
 from app.models.validation import RiskAssessment, TestRun
@@ -109,6 +110,7 @@ def dashboard_metrics(db: Session) -> dict:
         "average_resolution_hours": round(avg_res, 2),
         "median_resolution_hours": round(median_res, 2),
         "rules_in_production": prod_rules,
+        "active_configurations": db.query(func.count(ConfigurationMatrixRow.id)).scalar() or 0,
         "deployments_today": deployments_today,
         "regression_pass_rate": round(pass_rate, 4),
         "total_tickets": total_tickets,

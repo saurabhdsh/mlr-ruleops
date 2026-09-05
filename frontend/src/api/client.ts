@@ -84,6 +84,32 @@ export const DeployAPI = {
   deployProposal: (id: string) => api<any>(`/proposals/${id}/deploy`, { method: "POST" }),
 };
 
+export const ConfigAPI = {
+  list: (params = "") => api<any>(`/configurations${params}`),
+  get: (id: string) => api<any>(`/configurations/${id}`),
+  resolve: (body: unknown) =>
+    api<any>("/configurations/resolve", { method: "POST", body: JSON.stringify(body) }),
+  async exportCsv() {
+    const res = await fetch(`${API}/api/v1/configurations/export.csv`, {
+      headers: { Authorization: `Bearer ${getToken()}` },
+    });
+    if (!res.ok) throw new Error("Export failed");
+    return res.blob();
+  },
+  async importCsv(file: File) {
+    const form = new FormData();
+    form.append("file", file);
+    const res = await fetch(`${API}/api/v1/configurations/import`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${getToken()}` },
+      body: form,
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.message || "Import failed");
+    return data as { imported: number; updated: number; control_count: string };
+  },
+};
+
 export const PlatformAPI = {
   dashboard: () => api<any>("/analytics/dashboard"),
   audit: () => api<any[]>("/audit"),

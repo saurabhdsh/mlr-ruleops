@@ -420,11 +420,38 @@ function InterpretationPane({ data }: { data: any }) {
 }
 
 function ResolutionPane({ data }: { data: any }) {
+  const m = data?.matrix;
+  const sel = m?.selected;
   return (
-    <Card title="Why this rule?">
-      <p className="text-sm leading-relaxed max-w-3xl">{data?.proposal?.decision_record || "Process the ticket to resolve the hierarchy."}</p>
-      <div className="mt-4 text-sm">Selected {data?.proposal?.target_rule_id || "—"}</div>
-    </Card>
+    <div className="space-y-4">
+      <Card title="Configuration matrix">
+        <div className="text-sm">Status {m?.status || "—"}</div>
+        <p className="text-xs text-mist-500 mt-1">{m?.message}</p>
+        {sel ? (
+          <div className="mt-3 grid grid-cols-2 gap-2 text-sm">
+            <div>
+              Config <span className="mono">{sel.config_id}</span>
+            </div>
+            <div>
+              Rule <span className="mono">{sel.rule_id}</span>
+            </div>
+            <div>Market {sel.market}</div>
+            <div>Brand {sel.brand}</div>
+            <div>TA {sel.therapeutic_area}</div>
+            <div>String type {sel.string_type}</div>
+            <div>Language {sel.language}</div>
+            <div className="col-span-2 text-xs text-mist-500">Old value: {sel.old_value}</div>
+            <div className="col-span-2 text-xs text-mist-500">New value: {sel.new_value || "—"}</div>
+          </div>
+        ) : (
+          <div className="mt-2 text-sm text-mist-500">No unique matrix row. 5-tier hierarchy is used as fallback.</div>
+        )}
+      </Card>
+      <Card title="Why this rule?">
+        <p className="text-sm leading-relaxed max-w-3xl">{data?.proposal?.decision_record || "Process the ticket to resolve the hierarchy."}</p>
+        <div className="mt-4 text-sm">Selected {data?.proposal?.target_rule_id || "—"}</div>
+      </Card>
+    </div>
   );
 }
 

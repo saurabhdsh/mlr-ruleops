@@ -69,6 +69,14 @@ class ChangeType(StrEnum):
     BUSINESS_LOGIC_CHANGE = "BUSINESS_LOGIC_CHANGE"
 
 
+class StringType(StrEnum):
+    DISCLAIMER = "DISCLAIMER"
+    PI_LINK = "PI_LINK"
+    CLAIM = "CLAIM"
+    LEGAL_FOOTER = "LEGAL_FOOTER"
+    ROUTING = "ROUTING"
+
+
 class MutationOp(StrEnum):
     REPLACE_TEXT = "replace_text"
     ADD_REFERENCE = "add_reference"

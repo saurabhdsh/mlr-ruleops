@@ -54,6 +54,18 @@ class DeterministicFallbackProvider(LLMProvider):
         intent_name = "UPDATE_DISCLAIMER" if "disclaimer" in lower else "UPDATE_RULE"
         operation = "REPLACE_REFERENCE" if citation_remove or citation_add else "REPLACE_TEXT"
         category = "DISCLAIMER" if "disclaimer" in lower else "GENERAL"
+        if "disclaimer" in lower:
+            string_type = "DISCLAIMER"
+        elif "hyperlink" in lower or "prescribing-information" in lower or "pi link" in lower:
+            string_type = "PI_LINK"
+        elif "route" in lower or is_logic:
+            string_type = "ROUTING"
+        elif "legal" in lower or "footer" in lower:
+            string_type = "LEGAL_FOOTER"
+        elif "claim" in lower:
+            string_type = "CLAIM"
+        else:
+            string_type = category if category != "GENERAL" else "DISCLAIMER"
 
         routing_target = None
         constraint = None
@@ -102,6 +114,9 @@ class DeterministicFallbackProvider(LLMProvider):
             language=_field(language, 0.9),
             material_type=_field(material, 0.85 if material else 0.4),
             rule_category=_field(category, 0.93 if category == "DISCLAIMER" else 0.6),
+            string_type=_field(string_type, 0.93),
+            old_value="CIT-2020-001" if citation_remove else None,
+            new_value="CIT-2026-004" if citation_add else None,
             operation=operation,
             citation_to_remove=citation_remove,
             citation_to_add=citation_add,

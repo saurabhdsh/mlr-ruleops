@@ -21,12 +21,13 @@ If a high-risk field is unknown, set value to null and lower confidence.
 Never include chain-of-thought. Provide a short business decision_summary only.
 Schema version: change-intent-v1
 
-Each of market, brand, therapeutic_area, language, material_type, rule_category MUST be an object:
+Each of market, brand, therapeutic_area, language, material_type, rule_category, string_type MUST be an object:
 {"value": string|null, "confidence": number}
 
 Required top-level keys:
-change_type, intent, market, brand, therapeutic_area, language, material_type, rule_category,
+change_type, intent, market, brand, therapeutic_area, language, material_type, rule_category, string_type,
 operation, citation_to_remove, citation_to_add, overall_confidence, decision_summary
+string_type value is one of DISCLAIMER, PI_LINK, CLAIM, LEGAL_FOOTER, ROUTING.
 """
 
 PROPOSE_PROMPT = """You are an MLR RuleOps mutation planner.
@@ -55,6 +56,7 @@ INTENT_OBJECT_FIELDS = (
     "language",
     "material_type",
     "rule_category",
+    "string_type",
 )
 
 
