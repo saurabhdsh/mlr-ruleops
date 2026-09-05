@@ -6,8 +6,8 @@ from typing import Any
 from app.rules.dsl import ChangeIntent, ChangeIntentField
 from app.ai.provider import LLMProvider
 
-MARKETS = ["US", "UK", "DE", "FR", "ES", "IT", "JP", "AU", "CA"]
-BRANDS = ["Drug A", "Drug B", "Drug C", "Drug X"]
+MARKETS = ["US", "UK", "DE", "FR", "ES", "IT", "JP", "AU", "CA", "BR", "LATAM", "MX"]
+BRANDS = ["Drug A", "Drug B", "Drug C", "Drug X", "Trelegy", "Jemperli", "Nucala", "Blenrep", "Shingrix", "Benlysta"]
 AREAS = ["Cardiovascular", "Respiratory", "Oncology", "Immunology", "Vaccines"]
 MATERIALS = [
     "Promotional",
@@ -178,6 +178,14 @@ class DeterministicFallbackProvider(LLMProvider):
 
 
 def _find_market(text: str) -> str | None:
+    if re.search(r"\blatam\b|\blatin america\b", text, re.I):
+        return "LATAM"
+    if re.search(r"\bbrazil\b|\bbrasil\b|\bBR\b", text, re.I):
+        return "BR"
+    if re.search(r"\bgermany\b|\bdeutschland\b|\bDE\b", text, re.I):
+        return "DE"
+    if re.search(r"\bfrance\b|\bFR\b", text, re.I):
+        return "FR"
     if re.search(r"\bunited states\b|\bU\.S\.\b|\bUS\b", text, re.I):
         return "US"
     for m in MARKETS:

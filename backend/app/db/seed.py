@@ -53,6 +53,9 @@ def seed_if_empty(db: Session, reviews: int = 200) -> None:
         seed_all(db, reviews)
         return
     seed_configuration_matrix_if_empty(db)
+    from app.db.gsk_workbook import seed_gsk_workbook_if_empty
+
+    seed_gsk_workbook_if_empty(db)
 
 
 def seed_all(db: Session, reviews: int = 200) -> None:
@@ -65,6 +68,9 @@ def seed_all(db: Session, reviews: int = 200) -> None:
     generate_historical_reviews(db, reviews)
     _test_cases(db)
     seed_configuration_matrix_if_empty(db)
+    from app.db.gsk_workbook import seed_gsk_workbook_if_empty
+
+    seed_gsk_workbook_if_empty(db)
     db.flush()
 
 
@@ -484,6 +490,10 @@ def _tickets(db: Session) -> None:
         brand_hint="Drug A",
         therapeutic_area_hint="Cardiovascular",
         language_hint="EN",
+        hitl_gate="Gate3-SingleApproval",
+        autonomy_tier="Assisted",
+        expected_target_rule="RULE-US-DRUGA-CV-014",
+        match_confidence=0.97,
         is_demo_seed=True,
         due_date=datetime.now(UTC) + timedelta(days=3),
     )
@@ -514,6 +524,8 @@ def _tickets(db: Session) -> None:
                 market_hint=market,
                 brand_hint=brand,
                 change_type=ctype,
+                hitl_gate="Gate3-SingleApproval",
+                autonomy_tier="Assisted",
             )
         )
 

@@ -67,6 +67,16 @@ class RuleStatus(StrEnum):
 class ChangeType(StrEnum):
     TEXT_STRING_UPDATE = "TEXT_STRING_UPDATE"
     BUSINESS_LOGIC_CHANGE = "BUSINESS_LOGIC_CHANGE"
+    AMBIGUOUS_INCOMPLETE = "AMBIGUOUS_INCOMPLETE"
+    ROLLBACK_REQUEST = "ROLLBACK_REQUEST"
+
+
+class HitlGate(StrEnum):
+    GATE1_INTENT_CONFIRM = "Gate1-IntentConfirm"
+    GATE2_RULE_MATCH = "Gate2-RuleMatch"
+    GATE3_SINGLE_APPROVAL = "Gate3-SingleApproval"
+    GATE3_DUAL_APPROVAL = "Gate3-DualApproval"
+    GATE3_BLOCK_RMCB = "Gate3-Block/RMCB"
 
 
 class StringType(StrEnum):

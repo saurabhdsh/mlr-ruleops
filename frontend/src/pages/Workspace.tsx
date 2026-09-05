@@ -23,7 +23,7 @@ export function WorkspacePage() {
   const { id } = useParams();
   const nav = useNavigate();
   const qc = useQueryClient();
-  const tickets = useQuery({ queryKey: ["tickets"], queryFn: () => TicketsAPI.list("?limit=50") });
+  const tickets = useQuery({ queryKey: ["tickets"], queryFn: () => TicketsAPI.list("?limit=80") });
   const selectedId = id || tickets.data?.find((t: any) => t.ticket_number === "TKT-1001")?.id || tickets.data?.[0]?.id;
   const ws = useQuery({
     queryKey: ["workspace", selectedId],
@@ -220,6 +220,11 @@ export function WorkspacePage() {
             <div className="text-xs text-mist-500">{t?.requester_email}</div>
             <div className="text-xs mt-2">Priority {t?.priority}</div>
             <div className="text-xs">Due {fmtDate(t?.due_date)}</div>
+            <div className="text-xs mt-2">
+              HITL <Badge status={t?.hitl_gate}>{t?.hitl_gate || "—"}</Badge>
+            </div>
+            <div className="text-xs mt-1">Autonomy {t?.autonomy_tier || "—"}</div>
+            <div className="text-[11px] text-mist-500 mt-1">Expected {t?.expected_target_rule || "—"}</div>
           </Card>
           <Card title="Attachments">
             {(data?.attachments || []).length === 0 && <div className="text-sm text-mist-500">None</div>}
@@ -308,6 +313,9 @@ export function WorkspacePage() {
         {tab === "Approval" && (
           <div className="grid grid-cols-2 gap-4">
             <Card title="Approval policy">
+              <div className="text-sm mb-2">
+                HITL <Badge status={t?.hitl_gate}>{t?.hitl_gate || "—"}</Badge>
+              </div>
               <div className="text-sm">Required roles</div>
               <div className="mono text-xs mt-1">{(data?.approval?.required_roles || []).join(" + ") || "—"}</div>
               <div className="mt-3 text-sm">Status {data?.approval?.status || "—"}</div>
@@ -324,8 +332,11 @@ export function WorkspacePage() {
                 <Button onClick={() => approve.mutate(false)} disabled={!data?.approval}>
                   Approve
                 </Button>
-                <Button onClick={() => approve.mutate(true)} disabled={!data?.approval}>
-                  Approve & Deploy
+                <Button
+                  onClick={() => approve.mutate(true)}
+                  disabled={!data?.approval || t?.hitl_gate === "Gate3-Block/RMCB"}
+                >
+                  {t?.hitl_gate === "Gate3-Block/RMCB" ? "Deploy blocked (RMCB)" : "Approve & Deploy"}
                 </Button>
                 <Button variant="ghost" onClick={() => changes.mutate()} disabled={!data?.approval}>
                   Request changes
@@ -642,6 +653,9 @@ function RiskPane({ data }: { data: any }) {
         <p className="text-sm leading-relaxed">{data?.risk?.rationale}</p>
         <p className="text-xs text-mist-500 mt-3">{data?.risk?.ai_summary}</p>
         <p className="text-xs mt-2">Policy gate: {data?.risk?.policy_gate}</p>
+        <p className="text-xs mt-1">
+          HITL <Badge status={data?.ticket?.hitl_gate}>{data?.ticket?.hitl_gate || "—"}</Badge>
+        </p>
       </Card>
     </div>
   );

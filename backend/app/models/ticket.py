@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import DateTime, ForeignKey, Integer, String, Text, UniqueConstraint
+from sqlalchemy import DateTime, Float, ForeignKey, Integer, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
@@ -28,6 +28,10 @@ class Ticket(Base, UUIDPkMixin, TimestampMixin):
     language_hint: Mapped[str | None] = mapped_column(String(16), nullable=True)
     change_type: Mapped[str | None] = mapped_column(String(64), nullable=True)
     risk_level: Mapped[str | None] = mapped_column(String(16), nullable=True)
+    hitl_gate: Mapped[str | None] = mapped_column(String(64), nullable=True, index=True)
+    autonomy_tier: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    expected_target_rule: Mapped[str | None] = mapped_column(String(160), nullable=True)
+    match_confidence: Mapped[float | None] = mapped_column(Float, nullable=True)
     owner_id: Mapped[str | None] = mapped_column(String(36), ForeignKey("users.id"), nullable=True)
     due_date: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     processed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)

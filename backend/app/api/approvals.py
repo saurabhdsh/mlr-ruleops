@@ -34,6 +34,7 @@ def list_approvals(db: DbDep, user: UserDep, status: str | None = "PENDING") -> 
                 "ticket_number": ticket.ticket_number if ticket else None,
                 "title": ticket.title if ticket else None,
                 "risk_level_at_request": r.risk_level_at_request,
+                "hitl_gate": ticket.hitl_gate if ticket else None,
                 "required_roles": r.required_roles,
                 "proposal_id": r.proposal_id,
             }

@@ -48,6 +48,12 @@ class TicketOut(BaseModel):
     brand_hint: str | None
     change_type: str | None
     risk_level: str | None
+    hitl_gate: str | None = None
+    autonomy_tier: str | None = None
+    expected_target_rule: str | None = None
+    match_confidence: float | None = None
+    therapeutic_area_hint: str | None = None
+    language_hint: str | None = None
     owner_id: str | None
     current_proposal_id: str | None
     created_at: datetime

@@ -56,7 +56,7 @@ export function TicketsPage() {
         <table className="w-full text-sm">
           <thead className="text-[11px] uppercase text-mist-500">
             <tr>
-              {["Ticket ID", "Source", "Title", "Market", "Brand", "Change type", "Risk", "Stage", "Age", "Created"].map((h) => (
+              {["Ticket ID", "Source", "Title", "Market", "Brand", "HITL Gate", "Change type", "Risk", "Stage", "Age"].map((h) => (
                 <th key={h} className="text-left py-2 pr-3 font-medium">
                   {h}
                 </th>
@@ -75,6 +75,9 @@ export function TicketsPage() {
                 <td className="pr-3 max-w-[280px] truncate">{t.title}</td>
                 <td className="pr-3">{t.market_hint || "—"}</td>
                 <td className="pr-3">{t.brand_hint || "—"}</td>
+                <td className="pr-3">
+                  <Badge status={t.hitl_gate}>{t.hitl_gate || "—"}</Badge>
+                </td>
                 <td className="pr-3">{t.change_type || "—"}</td>
                 <td className="pr-3">
                   <Badge status={t.risk_level}>{t.risk_level || "—"}</Badge>

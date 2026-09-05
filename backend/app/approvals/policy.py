@@ -69,6 +69,7 @@ class ApprovalPolicyEngine:
         scope_type: str | None,
         risk: str,
         citation_unverified: bool = False,
+        hitl_gate: str | None = None,
     ) -> PolicyMatch:
         if citation_unverified:
             return PolicyMatch(
@@ -76,6 +77,45 @@ class ApprovalPolicyEngine:
                 required_roles=[],
                 governance_label="Deployment blocked pending citation verification",
                 reason="Unresolved scientific citation",
+            )
+        if hitl_gate == "Gate1-IntentConfirm":
+            return PolicyMatch(
+                policy_name="hitl_gate1",
+                required_roles=[],
+                governance_label="Gate1-IntentConfirm",
+                reason="Insufficient intent — human must confirm market, brand, and change before targeting.",
+            )
+        if hitl_gate == "Gate2-RuleMatch":
+            return PolicyMatch(
+                policy_name="hitl_gate2",
+                required_roles=[RoleName.MLR_ADMIN.value],
+                governance_label="Gate2-RuleMatch",
+                reason="Ambiguous rule match — human must confirm the target configuration.",
+            )
+        if hitl_gate == "Gate3-DualApproval":
+            return PolicyMatch(
+                policy_name="hitl_gate3_dual",
+                required_roles=[RoleName.MEDICAL_REVIEWER.value, RoleName.MLR_ADMIN.value],
+                governance_label="Gate3-DualApproval",
+                reason="Workbook dual-control gate.",
+            )
+        if hitl_gate == "Gate3-Block/RMCB":
+            return PolicyMatch(
+                policy_name="hitl_gate3_block",
+                required_roles=[
+                    RoleName.MEDICAL_REVIEWER.value,
+                    RoleName.REGULATORY_REVIEWER.value,
+                    RoleName.MLR_ADMIN.value,
+                ],
+                governance_label="Gate3-Block/RMCB",
+                reason="Guardrail / RMCB block — deploy withheld until the board clears the change.",
+            )
+        if hitl_gate == "Gate3-SingleApproval":
+            return PolicyMatch(
+                policy_name="hitl_gate3_single",
+                required_roles=[RoleName.MLR_ADMIN.value],
+                governance_label="Gate3-SingleApproval",
+                reason="Workbook single-approver gate.",
             )
         matches: list[tuple[int, dict]] = []
         for policy in self.policies:

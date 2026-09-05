@@ -27,7 +27,8 @@ export function statusTone(status?: string) {
 export function pill(status?: string) {
   const s = (status || "").toUpperCase();
   if (["PASS", "DEPLOYED", "APPROVED", "CLOSED", "SUCCESS"].includes(s)) return "bg-pass/15 text-pass";
-  if (["WARN", "AWAITING_APPROVAL", "HIGH", "PENDING"].includes(s)) return "bg-warn/15 text-warn";
-  if (["FAIL", "FAILED", "REJECTED", "CRITICAL"].includes(s)) return "bg-fail/15 text-fail";
+  if (["WARN", "AWAITING_APPROVAL", "HIGH", "PENDING", "GATE2-RULEMATCH", "GATE1-INTENTCONFIRM"].includes(s))
+    return "bg-warn/15 text-warn";
+  if (["FAIL", "FAILED", "REJECTED", "CRITICAL", "GATE3-BLOCK/RMCB"].includes(s)) return "bg-fail/15 text-fail";
   return "bg-info/15 text-info";
 }

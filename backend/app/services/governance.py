@@ -142,7 +142,16 @@ def decide_approval(
         actor_id=user.id,
         ticket_id=ticket.id,
     )
-    if deploy or decision == ApprovalDecisionType.APPROVE_AND_DEPLOY:
+    block_deploy = (ticket.hitl_gate or "") == "Gate3-Block/RMCB"
+    if block_deploy and (deploy or decision == ApprovalDecisionType.APPROVE_AND_DEPLOY):
+        _emit(
+            db,
+            ticket,
+            "HITL_GATE_BLOCK",
+            "Gate3-Block/RMCB — approval recorded, deploy withheld",
+            {"hitl_gate": ticket.hitl_gate},
+        )
+    elif deploy or decision == ApprovalDecisionType.APPROVE_AND_DEPLOY:
         deploy_proposal(db, proposal.id, user)
     return req
 

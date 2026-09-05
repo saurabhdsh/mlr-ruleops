@@ -52,6 +52,7 @@ const STAGES = [
       "TARGET_RULE_SELECTED",
       "CURRENT_RULE_RETRIEVED",
       "RULE_NOT_FOUND",
+      "HITL_GATE",
     ],
   },
   {
@@ -101,7 +102,7 @@ const STAGES = [
     label: "Approval gate",
     hint: "Queue for MLR admin sign-off",
     icon: UserCheck,
-    events: ["APPROVAL_REQUESTED", "NEEDS_CLARIFICATION"],
+    events: ["APPROVAL_REQUESTED", "NEEDS_CLARIFICATION", "HITL_GATE", "HITL_GATE_BLOCK"],
   },
 ] as const;
 

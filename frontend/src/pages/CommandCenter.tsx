@@ -7,7 +7,7 @@ import { fmtPct } from "../utils/format";
 
 export function CommandCenter() {
   const dash = useQuery({ queryKey: ["dash"], queryFn: PlatformAPI.dashboard });
-  const tickets = useQuery({ queryKey: ["tickets"], queryFn: () => TicketsAPI.list("?limit=8") });
+  const tickets = useQuery({ queryKey: ["tickets"], queryFn: () => TicketsAPI.list("?limit=12") });
   const ints = useQuery({ queryKey: ["ints"], queryFn: PlatformAPI.integrations });
   const d = dash.data || {};
   return (
@@ -84,6 +84,7 @@ export function CommandCenter() {
               <th className="text-left py-2">ID</th>
               <th className="text-left">Title</th>
               <th className="text-left">Stage</th>
+              <th className="text-left">HITL Gate</th>
               <th className="text-left">Risk</th>
             </tr>
           </thead>
@@ -98,6 +99,9 @@ export function CommandCenter() {
                 <td>{t.title}</td>
                 <td>
                   <Badge status={t.status}>{t.status}</Badge>
+                </td>
+                <td>
+                  <Badge status={t.hitl_gate}>{t.hitl_gate || "—"}</Badge>
                 </td>
                 <td>{t.risk_level || "—"}</td>
               </tr>

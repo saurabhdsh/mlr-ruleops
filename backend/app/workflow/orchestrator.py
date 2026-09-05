@@ -202,10 +202,15 @@ class TicketOrchestrator:
             new_state=json.loads(intent.model_dump_json()),
         )
 
-        if intent.overall_confidence < settings.llm_confidence_threshold or intent.ambiguities:
+        if (ticket.hitl_gate or "") == "Gate1-IntentConfirm" or intent.overall_confidence < settings.llm_confidence_threshold or intent.ambiguities:
             transition(ticket, WorkflowState.NEEDS_CLARIFICATION)
             ticket.processing_lock = 0
-            self.emit(ticket, "NEEDS_CLARIFICATION", "Confidence below threshold or missing fields")
+            reason = (
+                "HITL Gate1-IntentConfirm — requester must confirm market, brand, and change"
+                if (ticket.hitl_gate or "") == "Gate1-IntentConfirm"
+                else "Confidence below threshold or missing fields"
+            )
+            self.emit(ticket, "NEEDS_CLARIFICATION", reason, {"hitl_gate": ticket.hitl_gate})
             return ticket
 
         transition(ticket, WorkflowState.RULE_RESOLVING)
@@ -284,6 +289,20 @@ class TicketOrchestrator:
             f"{len(resolution.candidates)} candidates found",
             {"count": len(resolution.candidates)},
         )
+        if (ticket.hitl_gate or "") == "Gate2-RuleMatch":
+            transition(ticket, WorkflowState.NEEDS_CLARIFICATION)
+            ticket.processing_lock = 0
+            self.emit(
+                ticket,
+                "HITL_GATE",
+                "HITL Gate2-RuleMatch — human must confirm the target rule",
+                {
+                    "hitl_gate": ticket.hitl_gate,
+                    "expected_target_rule": ticket.expected_target_rule,
+                    "candidates": [c.rule_id for c in resolution.candidates[:8]],
+                },
+            )
+            return ticket
         transition(ticket, WorkflowState.RULE_RESOLVED)
         self.emit(
             ticket,
@@ -669,6 +688,7 @@ class TicketOrchestrator:
             scope_type=rule.scopes[0].scope_type if rule.scopes else "MARKET_BRAND",
             risk=risk.overall,
             citation_unverified=citation_unverified,
+            hitl_gate=ticket.hitl_gate,
         )
         req = ApprovalRequest(
             proposal_id=proposal.id,

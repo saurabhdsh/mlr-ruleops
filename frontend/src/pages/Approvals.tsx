@@ -18,7 +18,7 @@ export function ApprovalsPage() {
         <table className="w-full text-sm">
           <thead className="text-[11px] uppercase text-mist-500">
             <tr>
-              {["Ticket", "Title", "Risk", "Roles", "Status", "Action"].map((h) => (
+              {["Ticket", "Title", "HITL Gate", "Risk", "Roles", "Status", "Action"].map((h) => (
                 <th key={h} className="text-left py-2">
                   {h}
                 </th>
@@ -35,6 +35,9 @@ export function ApprovalsPage() {
                 </td>
                 <td>{a.title}</td>
                 <td>
+                  <Badge status={a.hitl_gate}>{a.hitl_gate || "—"}</Badge>
+                </td>
+                <td>
                   <Badge status={a.risk_level_at_request}>{a.risk_level_at_request}</Badge>
                 </td>
                 <td className="text-xs">{a.required_roles}</td>
@@ -42,8 +45,11 @@ export function ApprovalsPage() {
                   <Badge status={a.status}>{a.status}</Badge>
                 </td>
                 <td>
-                  {a.status === "PENDING" && (
+                  {a.status === "PENDING" && a.hitl_gate !== "Gate3-Block/RMCB" && (
                     <Button onClick={() => approve.mutate(a.id)}>Approve & deploy</Button>
+                  )}
+                  {a.status === "PENDING" && a.hitl_gate === "Gate3-Block/RMCB" && (
+                    <span className="text-xs text-fail">RMCB block</span>
                   )}
                 </td>
               </tr>
