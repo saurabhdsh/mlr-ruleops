@@ -21,6 +21,8 @@ export function ConfigurationMatrixPage() {
   }, [market, language, stringType, brand]);
   const list = useQuery({ queryKey: ["configurations", params], queryFn: () => ConfigAPI.list(params) });
   const rows = list.data?.rows || [];
+  const rowCount = list.data?.count ?? rows.length;
+  const languageCount = list.data?.language_count;
   const importMut = useMutation({
     mutationFn: (file: File) => ConfigAPI.importCsv(file),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["configurations"] }),
@@ -39,7 +41,11 @@ export function ConfigurationMatrixPage() {
   return (
     <Page
       title="Configuration Matrix"
-      subtitle="78 Static Text rows. Tickets resolve here first, then the 5-tier rule engine."
+      subtitle={
+        languageCount
+          ? `${rowCount} Static Text rows · ${languageCount} languages. Unique matrix hit pins the config; miss or HITL Gate 1/2 falls through to the 5-tier engine.`
+          : "Static Text catalog. Unique matrix hit pins the config; otherwise the 5-tier engine and HITL gate run."
+      }
       actions={
         <>
           <Button variant="ghost" onClick={onExport}>
@@ -61,7 +67,7 @@ export function ConfigurationMatrixPage() {
       }
     >
       <div className="text-[11px] text-mist-500 mb-3">
-        {list.data?.count ?? "—"} rows · {list.data?.language_count ?? "—"} languages
+        {rowCount ?? "—"} rows · {languageCount ?? "—"} languages
         {importMut.data ? ` · Last import ${importMut.data.control_count}` : ""}
       </div>
       <div className="flex flex-wrap gap-2 mb-4">
